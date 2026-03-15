@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using UrlShortener.Api.Data;
 using UrlShortener.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +12,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IUrlShortenerService, UrlShortenerService>();
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=urlshortener.db"));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

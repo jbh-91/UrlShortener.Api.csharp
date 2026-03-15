@@ -1,10 +1,28 @@
-﻿namespace UrlShortener.Api.Services
+﻿using Microsoft.EntityFrameworkCore;
+using UrlShortener.Api.Data;
+using UrlShortener.Api.Models;
+
+namespace UrlShortener.Api.Services
 {
     public class UrlShortenerService : IUrlShortenerService
     {
+        private readonly AppDbContext appDbContext;
+
+        public UrlShortenerService(AppDbContext appDbContext) {
+            this.appDbContext = appDbContext;
+        }
+
         public string Shorten(string originalUrl)
         {
-            return "https://short.ly/xyz"; // Dummy-String als Platzhalter für die tatsächliche Logik zur URL-Verkürzung
+            UrlMapping urlMapping = new UrlMapping {
+                OriginalUrl = originalUrl,
+                ShortUrl = "https://short.ly/xyz",
+                CreatedAt = DateTime.UtcNow
+            };
+            appDbContext.UrlMappings.Add(urlMapping);
+            appDbContext.SaveChanges();
+
+            return urlMapping.ShortUrl;
         }
     }
 }
