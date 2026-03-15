@@ -16,10 +16,12 @@ namespace UrlShortener.Api.Services
         {
             UrlMapping urlMapping = new UrlMapping {
                 OriginalUrl = originalUrl,
-                ShortUrl = "https://short.ly/xyz",
                 CreatedAt = DateTime.UtcNow
             };
             appDbContext.UrlMappings.Add(urlMapping);
+            appDbContext.SaveChanges();
+
+            urlMapping.ShortUrl = Utils.Base62Converter.Encode(urlMapping.Id);
             appDbContext.SaveChanges();
 
             return urlMapping.ShortUrl;
