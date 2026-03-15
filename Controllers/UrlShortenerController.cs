@@ -25,7 +25,7 @@ public class UrlShortenerController : ControllerBase
 
     [HttpGet("{shortUrl}")]
     public IActionResult RedirectToOriginalUrl(string shortUrl) {
-        UrlMapping urlMapping = appDbContext.UrlMappings.FirstOrDefault(x => x.ShortUrl == shortUrl);
+        UrlMapping? urlMapping = appDbContext.UrlMappings.FirstOrDefault(x => x.ShortUrl == shortUrl);
         return urlMapping != null ? Redirect(urlMapping.OriginalUrl) : NotFound();
     }
 }
