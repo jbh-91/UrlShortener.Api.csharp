@@ -6,20 +6,23 @@ public static class Base62Converter
 
     public static string Encode(long id)
     {
-        // Edge case for 0, as it would return an empty string otherwise
+        // Edge case for 0, otherwise it returns an empty string
         if (id == 0) return Base62Chars[0].ToString();
 
-        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        // A long in Base62 is at most 11 characters.
+        // Using stackalloc to avoid heap allocation for the buffer.
+        Span<char> buffer = stackalloc char[11];
 
+        // Populate the buffer backwards
+        int index = 11;
         while (id > 0)
         {
-            sb.Append(Base62Chars[(int)(id % 62)]);
+            index--;
+            buffer[index] = Base62Chars[(int)(id % 62)];
             id /= 62;
         }
-        // Reverse the string to get the correct order
-        char[] charArray = sb.ToString().ToCharArray();
-        Array.Reverse(charArray);
 
-        return new string(charArray);
+        // Create the string from the actually used slice of the buffer
+        return new string(buffer.Slice(index));
     }
 }
