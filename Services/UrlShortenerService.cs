@@ -12,17 +12,27 @@ namespace UrlShortener.Api.Services
             _appDbContext = appDbContext;
         }
 
-        public string Shorten(string originalUrl)
+        public async Task<string> ShortenAsync(string originalUrl)
         {
-            UrlMapping urlMapping = new UrlMapping(originalUrl);
+            var urlMapping = new UrlMapping(originalUrl);
 
             _appDbContext.UrlMappings.Add(urlMapping);
-            _appDbContext.SaveChanges();
+
+            await _appDbContext.SaveChangesAsync();
 
             urlMapping.ShortUrl = Utils.Base62Converter.Encode(urlMapping.Id);
-            _appDbContext.SaveChanges();
+            
+            await _appDbContext.SaveChangesAsync();
 
             return urlMapping.ShortUrl;
+        }
+
+        public async Task<string?> GetOriginalUrlAsync(string shortUrl)
+        {
+            var urlMapping = await _appDbContext.UrlMappings
+                .FirstOrDefaultAsync(x => x.ShortUrl == shortUrl);
+
+            return urlMapping?.OriginalUrl;
         }
     }
 }

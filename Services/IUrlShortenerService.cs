@@ -2,5 +2,6 @@
 
 public interface IUrlShortenerService
 {
-    public string Shorten(string originalUrl);
+    Task<string> ShortenAsync(string originalUrl);
+    Task<string?> GetOriginalUrlAsync(string shortUrl);
 }

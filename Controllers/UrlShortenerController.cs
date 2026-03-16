@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using UrlShortener.Api.Data;
 using UrlShortener.Api.DTOs;
-using UrlShortener.Api.Models;
 using UrlShortener.Api.Services;
 
 namespace UrlShortener.Api.Controllers;
@@ -11,21 +11,27 @@ namespace UrlShortener.Api.Controllers;
 public class UrlShortenerController : ControllerBase
 {
     private readonly IUrlShortenerService _urlShortenerService;
-    private readonly AppDbContext _appDbContext;
 
-    public UrlShortenerController(IUrlShortenerService urlShortenerService, AppDbContext appDbContext) {
+    public UrlShortenerController(IUrlShortenerService urlShortenerService, AppDbContext appDbContext)
+    {
         _urlShortenerService = urlShortenerService;
-        _appDbContext = appDbContext;
     }
 
         [HttpPost("/shorten")]
-    public IActionResult ShortenUrl([FromBody] CreateUrlRequest request) {
-        return Ok(_urlShortenerService.Shorten(request.OriginalUrl));
+    public async Task<IActionResult> ShortenUrl([FromBody] CreateUrlRequest request)
+    {
+        var shortUrl = await _urlShortenerService.ShortenAsync(request.OriginalUrl);
+        return Ok(shortUrl);
     }
 
     [HttpGet("/{shortUrl}")]
-    public IActionResult RedirectToOriginalUrl(string shortUrl) {
-        UrlMapping? urlMapping = _appDbContext.UrlMappings.FirstOrDefault(x => x.ShortUrl == shortUrl);
-        return urlMapping != null ? Redirect(urlMapping.OriginalUrl) : NotFound();
+    public async Task<IActionResult> RedirectToOriginalUrl(string shortUrl)
+    {
+        var originalUrl = await _urlShortenerService.GetOriginalUrlAsync(shortUrl);
+
+        if (originalUrl == null)
+            return NotFound();
+
+        return Redirect(originalUrl);
     }
 }
