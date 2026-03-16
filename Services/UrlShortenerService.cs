@@ -2,37 +2,37 @@
 using UrlShortener.Api.Data;
 using UrlShortener.Api.Models;
 
-namespace UrlShortener.Api.Services
+namespace UrlShortener.Api.Services;
+
+public class UrlShortenerService : IUrlShortenerService
 {
-    public class UrlShortenerService : IUrlShortenerService
+    private readonly AppDbContext _appDbContext;
+    private readonly IConfiguration _configuration;
+
+    public UrlShortenerService(AppDbContext appDbContext, IConfiguration configuration) {
+        _appDbContext = appDbContext;
+        _configuration = configuration;
+    }
+
+    public async Task<string> ShortenAsync(string originalUrl)
     {
-        private readonly AppDbContext _appDbContext;
+        var baseUrl = _configuration["BaseUrl"];
+        var urlMapping = new UrlMapping(originalUrl);
 
-        public UrlShortenerService(AppDbContext appDbContext) {
-            _appDbContext = appDbContext;
-        }
+        _appDbContext.UrlMappings.Add(urlMapping);
+        await _appDbContext.SaveChangesAsync();
 
-        public async Task<string> ShortenAsync(string originalUrl)
-        {
-            var urlMapping = new UrlMapping(originalUrl);
+        urlMapping.ShortUrl = Utils.Base62Converter.Encode(urlMapping.Id);
+        await _appDbContext.SaveChangesAsync();
 
-            _appDbContext.UrlMappings.Add(urlMapping);
+        return $"{baseUrl}{urlMapping.ShortUrl}";
+    }
 
-            await _appDbContext.SaveChangesAsync();
+    public async Task<string?> GetOriginalUrlAsync(string shortUrl)
+    {
+        var urlMapping = await _appDbContext.UrlMappings
+            .FirstOrDefaultAsync(x => x.ShortUrl == shortUrl);
 
-            urlMapping.ShortUrl = Utils.Base62Converter.Encode(urlMapping.Id);
-            
-            await _appDbContext.SaveChangesAsync();
-
-            return urlMapping.ShortUrl;
-        }
-
-        public async Task<string?> GetOriginalUrlAsync(string shortUrl)
-        {
-            var urlMapping = await _appDbContext.UrlMappings
-                .FirstOrDefaultAsync(x => x.ShortUrl == shortUrl);
-
-            return urlMapping?.OriginalUrl;
-        }
+        return urlMapping?.OriginalUrl;
     }
 }
