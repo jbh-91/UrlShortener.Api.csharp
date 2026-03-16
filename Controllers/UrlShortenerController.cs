@@ -23,7 +23,7 @@ public class UrlShortenerController : ControllerBase
         return Ok(urlShortenerService.Shorten(request.OriginalUrl));
     }
 
-    [HttpGet("{shortUrl}")]
+    [HttpGet("/{shortUrl}")]
     public IActionResult RedirectToOriginalUrl(string shortUrl) {
         UrlMapping? urlMapping = appDbContext.UrlMappings.FirstOrDefault(x => x.ShortUrl == shortUrl);
         return urlMapping != null ? Redirect(urlMapping.OriginalUrl) : NotFound();
