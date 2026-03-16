@@ -20,8 +20,6 @@ public class UrlShortenerService : IUrlShortenerService
         var urlMapping = new UrlMapping(originalUrl);
 
         _appDbContext.UrlMappings.Add(urlMapping);
-        await _appDbContext.SaveChangesAsync();
-
         urlMapping.ShortUrl = Utils.Base62Converter.Encode(urlMapping.Id);
         await _appDbContext.SaveChangesAsync();
 
