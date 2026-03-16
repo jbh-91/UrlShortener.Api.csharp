@@ -6,23 +6,21 @@ namespace UrlShortener.Api.Services
 {
     public class UrlShortenerService : IUrlShortenerService
     {
-        private readonly AppDbContext appDbContext;
+        private readonly AppDbContext _appDbContext;
 
         public UrlShortenerService(AppDbContext appDbContext) {
-            this.appDbContext = appDbContext;
+            _appDbContext = appDbContext;
         }
 
         public string Shorten(string originalUrl)
         {
-            UrlMapping urlMapping = new UrlMapping {
-                OriginalUrl = originalUrl,
-                CreatedAt = DateTime.UtcNow
-            };
-            appDbContext.UrlMappings.Add(urlMapping);
-            appDbContext.SaveChanges();
+            UrlMapping urlMapping = new UrlMapping(originalUrl);
+
+            _appDbContext.UrlMappings.Add(urlMapping);
+            _appDbContext.SaveChanges();
 
             urlMapping.ShortUrl = Utils.Base62Converter.Encode(urlMapping.Id);
-            appDbContext.SaveChanges();
+            _appDbContext.SaveChanges();
 
             return urlMapping.ShortUrl;
         }

@@ -10,22 +10,22 @@ namespace UrlShortener.Api.Controllers;
 [Route("/api/v1/url")]
 public class UrlShortenerController : ControllerBase
 {
-    private readonly IUrlShortenerService urlShortenerService;
-    private readonly AppDbContext appDbContext;
+    private readonly IUrlShortenerService _urlShortenerService;
+    private readonly AppDbContext _appDbContext;
 
     public UrlShortenerController(IUrlShortenerService urlShortenerService, AppDbContext appDbContext) {
-        this.urlShortenerService = urlShortenerService;
-        this.appDbContext = appDbContext;
+        _urlShortenerService = urlShortenerService;
+        _appDbContext = appDbContext;
     }
 
         [HttpPost("/shorten")]
     public IActionResult ShortenUrl([FromBody] CreateUrlRequest request) {
-        return Ok(urlShortenerService.Shorten(request.OriginalUrl));
+        return Ok(_urlShortenerService.Shorten(request.OriginalUrl));
     }
 
     [HttpGet("/{shortUrl}")]
     public IActionResult RedirectToOriginalUrl(string shortUrl) {
-        UrlMapping? urlMapping = appDbContext.UrlMappings.FirstOrDefault(x => x.ShortUrl == shortUrl);
+        UrlMapping? urlMapping = _appDbContext.UrlMappings.FirstOrDefault(x => x.ShortUrl == shortUrl);
         return urlMapping != null ? Redirect(urlMapping.OriginalUrl) : NotFound();
     }
 }
